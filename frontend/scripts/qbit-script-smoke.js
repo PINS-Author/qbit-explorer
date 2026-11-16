@@ -538,6 +538,26 @@ require('@angular/compiler');
     const shown = inputButtons(tx.vin[0]);
     assert(JSON.stringify(shown) === JSON.stringify(buttons), `${name}: buttons ${JSON.stringify(shown)}`);
   }
+  // inputs past the first ones can come without a prevout (lazyPrevouts); the PINS button is set once
+  // "show more inputs" has loaded them
+  {
+    const { of } = require('rxjs');
+    const full = clone(pinsReveals.text.tx);
+    full.vin = [...Array(13).fill(clone(mint).vin[0]), full.vin[0]];
+    const lazy = clone(full);
+    lazy.vin[13] = { ...lazy.vin[13], prevout: null, lazy: true };
+    const { list, tx } = listTx(lazy);
+    assert(!tx.vin[13].isPinsInscription, 'PINS button on an input without a prevout');
+    Object.assign(list, { txPreview: false, electrsApiService: { getTransaction$: () => of(clone(full)) }, ref: { markForCheck: () => {} } });
+    list.loadMoreInputs(tx);
+    assert(tx.vin[13].isPinsInscription === true && tx.vin.slice(0, 13).every((vin) => !vin.isPinsInscription), 'PINS button after the inputs are loaded');
+    assert(JSON.stringify(inputButtons(tx.vin[13])) === JSON.stringify(['PINS']), 'PINS button on a loaded input');
+  }
+  // the PINS panel row is highlighted with its input, as the Qscription panel row is
+  {
+    const rowClasses = (key) => listTemplate.match(new RegExp(`<tr \\*ngIf="showOrdData\\[tx\\.txid \\+ '-${key}-' \\+ vindex\\]\\?\\.show" (\\[ngClass\\]="[^"]*")`))?.[1];
+    assert(rowClasses('vin') && rowClasses('pins') === rowClasses('vin'), 'PINS panel row classes');
+  }
   // the PINS button opens the P2MR Inscriptions of its input in the panel; the Qscription button still opens the ord ones
   {
     const { list, tx } = listTx(pinsReveals.text.tx);

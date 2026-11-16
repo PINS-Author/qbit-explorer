@@ -529,7 +529,10 @@ export class TransactionsListComponent implements OnInit, OnChanges, OnDestroy {
           tx.fee = newTx.fee;
           for (const [index, vin] of temp.entries()) {
             newTx.vin[index].isInscription = vin.isInscription;
-            newTx.vin[index].isPinsInscription = vin.isPinsInscription;
+          }
+          // inputs that came without a prevout (lazyPrevouts) are only checked now that they have one
+          for (const vin of newTx.vin) {
+            this.detectPinsInscription(tx, vin);
           }
           this.ref.markForCheck();
         });
