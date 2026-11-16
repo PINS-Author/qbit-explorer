@@ -521,10 +521,11 @@ const QBIT_POOL = {
   satflowTagCoinbaseRaw: '03a08d002f5162697420506f6f6c20627920536174666c6f772f0001e81146de000000000000',
 };
 
-// CloverPool was BTC.com until 2024 and signed its blocks `btccom` until late
-// October 2026 (definition 7's fixture, above); since qbit height 147597 the
-// embedded Bitcoin coinbase carries `cloverpool` instead. This is the parent
-// coinbase of qbit block
+// CloverPool was BTC.com until 2024 and went on signing its blocks `btccom`
+// (definition 7's fixture, above). It first signed `cloverpool` at qbit height
+// 147597, used both tags side by side until its last `btccom` block at height
+// 166921, and has signed `cloverpool` since. This is the parent coinbase of
+// qbit block
 // bf4aad951d6b1202bac0b9e87bedd41b74775fa64273f06ecd880c31dd124d1b (height
 // 178169), from Bitcoin block
 // 0000000000000000000a57bba9cf484e14d93e6d07ce09aa1746fdd7f43be62e.
@@ -870,8 +871,8 @@ describe('PoolsParser qbit vendored pool definitions', () => {
   });
 
   test.each([
-    ['the btccom tag it signed as BTC.com', AUXPOW_PARENT_MINERS.find(miner => miner.definitionId === 7)?.parentCoinbaseRaw ?? ''],
-    ['the cloverpool tag it signs now', CLOVERPOOL_CURRENT_TAG_PARENT_COINBASE_RAW],
+    ['its btccom tag', AUXPOW_PARENT_MINERS.find(miner => miner.definitionId === 7)?.parentCoinbaseRaw ?? ''],
+    ['its cloverpool tag', CLOVERPOOL_CURRENT_TAG_PARENT_COINBASE_RAW],
   ])('matches CloverPool from %s alone', (_label, scriptsig) => {
     poolsParser.setMiningPools(loadVendoredPools());
 
@@ -1635,11 +1636,40 @@ describe('PoolsParser qbit non-empty pool migration', () => {
     expect(mockMining.reindexHashrateRequested).toBe(true);
   });
 
-  test('renames the BTC.com row to CloverPool in place and adds its cloverpool tag', async () => {
+  test('renames the BTC.com row to CloverPool in place, adds its cloverpool tag and re-attributes its blocks', async () => {
     // Database as deployed before the rename: unique_id 7 is 'BTC.com' under
     // the btccom slug, matching only the `btccom` parent tag. Every other
     // pool is already current.
     const cloverPool = currentAuxpowPools.find(pool => pool.uniqueId === 7);
+    const cloverPoolMiner = AUXPOW_PARENT_MINERS.find(miner => miner.definitionId === 7);
+    // Two AuxPoW blocks that pay no registered address, so only the parent
+    // tag attributes them: one signed `btccom`, already the pool's, and one
+    // signed `cloverpool`, left on Unknown because the old definition didn't
+    // know that tag.
+    const unregisteredPayout = ['a914b318ac9dd6edf46e9a875498843633350ac27b8587'];
+    const btccomBlock = {
+      height: 7927, hash: cloverPoolMiner?.blockHash, coinbase_raw: '02f71e00', coinbase_addresses: null,
+      header: buildAuxPowHeader(cloverPoolMiner?.parentCoinbaseRaw ?? '', unregisteredPayout),
+    };
+    const cloverpoolBlock = {
+      height: 178169, hash: 'bf4aad951d6b1202bac0b9e87bedd41b74775fa64273f06ecd880c31dd124d1b', coinbase_raw: '03f9b70200', coinbase_addresses: null,
+      header: buildAuxPowHeader(CLOVERPOOL_CURRENT_TAG_PARENT_COINBASE_RAW, unregisteredPayout),
+    };
+    mockDbQuery.mockImplementation(async (sql: any, params?: any[]) => {
+      const text = typeof sql === 'string' ? sql : sql.sql;
+      if (text.includes('SELECT name from pools')) {
+        return [[{ name: 'Unknown' }]];
+      }
+      if (text.includes('FROM blocks')) {
+        if (params?.[0] === cloverPool?.id) {
+          return [[btccomBlock]];
+        }
+        if (params?.[0] === 0) {
+          return [[cloverpoolBlock]];
+        }
+      }
+      return [[], []];
+    });
     mockGetPoolByUniqueId.mockImplementation(async (id: number) => {
       if (id === 1) {
         return currentSatflowPool;
@@ -1691,7 +1721,7 @@ describe('PoolsParser qbit non-empty pool migration', () => {
     expect(mockRenameMiningPool).toHaveBeenCalledTimes(1);
     expect(mockRenameMiningPool).toHaveBeenCalledWith(cloverPool?.id, 'cloverpool', 'CloverPool');
     expect(mockUpdateMiningPoolLink).not.toHaveBeenCalled();
-    // the old tag stays, for the blocks it signed as BTC.com
+    // both tags are kept: the pool signed each of them as CloverPool
     expect(mockUpdateMiningPoolTags).toHaveBeenCalledTimes(1);
     expect(mockUpdateMiningPoolTags).toHaveBeenCalledWith(
       cloverPool?.id,
@@ -1701,6 +1731,16 @@ describe('PoolsParser qbit non-empty pool migration', () => {
       ['btccom', 'cloverpool'],
       'any'
     );
+    // the tag change re-indexes the pool's own blocks, then Unknown is re-matched
+    expect(mockDbQuery).toHaveBeenCalledWith(expect.stringContaining('FROM blocks'), [cloverPool?.id, 0]);
+    expect(mockDbQuery).toHaveBeenCalledWith(expect.stringContaining('FROM blocks'), [0, 0]);
+    // the `btccom` block still matches and stays where it is
+    expect(mockSavePool).not.toHaveBeenCalledWith(btccomBlock.hash, expect.anything());
+    // the Unknown block signed `cloverpool` moves to the pool
+    expect(mockSavePool).toHaveBeenCalledWith(cloverpoolBlock.hash, cloverPool?.id);
+    expect(mockSavePool).toHaveBeenCalledTimes(1);
+    // cached blocks would otherwise go on answering with the btccom slug
+    expect(mockRefreshCachedBlocks).toHaveBeenCalled();
     expect(mockUpdateDefinitionHash).toHaveBeenCalledWith('qbit-testsha');
   });
 
