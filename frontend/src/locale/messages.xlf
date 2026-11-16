@@ -538,7 +538,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">530</context>
+          <context context-type="linenumber">534</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/tx-bowtie-graph-tooltip/tx-bowtie-graph-tooltip.component.html</context>
@@ -696,7 +696,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">493</context>
+          <context context-type="linenumber">497</context>
         </context-group>
         <note priority="1" from="description">address.type</note>
       </trans-unit>
@@ -757,7 +757,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">521</context>
+          <context context-type="linenumber">525</context>
         </context-group>
         <note priority="1" from="description">shared.sats</note>
       </trans-unit>
@@ -3613,7 +3613,7 @@
         <source>Source inscription</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/ord-data/ord-data.component.html</context>
-          <context context-type="linenumber">45</context>
+          <context context-type="linenumber">46</context>
         </context-group>
         <note priority="1" from="description">ord.source-pins</note>
       </trans-unit>
@@ -3621,15 +3621,23 @@
         <source>Source qscription</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/ord-data/ord-data.component.html</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">48</context>
         </context-group>
         <note priority="1" from="description">ord.source-inscription</note>
+      </trans-unit>
+      <trans-unit id="86e7cbb484992c560c48f6690f63456812fc9868" datatype="html">
+        <source>Opaque</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/ord-data/ord-data.component.html</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+        <note priority="1" from="description">ord.opaque</note>
       </trans-unit>
       <trans-unit id="2719dbc7a7e7a691275cebd0b3a0723c4b6e2487" datatype="html">
         <source>Error decoding data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/ord-data/ord-data.component.html</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">68</context>
         </context-group>
         <note priority="1" from="description">error.decoding-data</note>
       </trans-unit>
@@ -3916,35 +3924,35 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">237</context>
+          <context context-type="linenumber">241</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">267</context>
+          <context context-type="linenumber">271</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">285</context>
+          <context context-type="linenumber">289</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">314</context>
+          <context context-type="linenumber">318</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">452</context>
+          <context context-type="linenumber">456</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">469</context>
+          <context context-type="linenumber">473</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">486</context>
+          <context context-type="linenumber">490</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">504</context>
+          <context context-type="linenumber">508</context>
         </context-group>
         <note priority="1" from="description">show-all</note>
       </trans-unit>
@@ -4277,27 +4285,27 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">239</context>
+          <context context-type="linenumber">243</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">268</context>
+          <context context-type="linenumber">272</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">286</context>
+          <context context-type="linenumber">290</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">453</context>
+          <context context-type="linenumber">457</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">470</context>
+          <context context-type="linenumber">474</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">487</context>
+          <context context-type="linenumber">491</context>
         </context-group>
         <note priority="1" from="description">show-less</note>
       </trans-unit>
@@ -4309,7 +4317,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">560</context>
+          <context context-type="linenumber">564</context>
         </context-group>
         <note priority="1" from="description">x-remaining</note>
       </trans-unit>
@@ -5167,11 +5175,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">316</context>
+          <context context-type="linenumber">320</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">506</context>
+          <context context-type="linenumber">510</context>
         </context-group>
         <note priority="1" from="description">show-more</note>
       </trans-unit>
@@ -5336,7 +5344,7 @@
         <source>ScriptSig (ASM)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">162</context>
+          <context context-type="linenumber">166</context>
         </context-group>
         <note priority="1" from="description">ScriptSig (ASM)</note>
         <note priority="1" from="meaning">transactions-list.scriptsig.asm</note>
@@ -5345,7 +5353,7 @@
         <source>ScriptSig (HEX)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">173</context>
+          <context context-type="linenumber">177</context>
         </context-group>
         <note priority="1" from="description">ScriptSig (HEX)</note>
         <note priority="1" from="meaning">transactions-list.scriptsig.hex</note>
@@ -5354,7 +5362,7 @@
         <source>Witness</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">178</context>
+          <context context-type="linenumber">182</context>
         </context-group>
         <note priority="1" from="description">transactions-list.witness</note>
       </trans-unit>
@@ -5362,7 +5370,7 @@
         <source>P2SH redeem script</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">248</context>
+          <context context-type="linenumber">252</context>
         </context-group>
         <note priority="1" from="description">transactions-list.p2sh-redeem-script</note>
       </trans-unit>
@@ -5370,7 +5378,7 @@
         <source>P2TR control block</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">253</context>
+          <context context-type="linenumber">257</context>
         </context-group>
         <note priority="1" from="description">transactions-list.p2tr-control-block</note>
       </trans-unit>
@@ -5378,7 +5386,7 @@
         <source>P2TR Simplicity script</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">261</context>
+          <context context-type="linenumber">265</context>
         </context-group>
         <note priority="1" from="description">transactions-list.p2tr-simplicity-script</note>
       </trans-unit>
@@ -5386,7 +5394,7 @@
         <source>P2TR tapscript</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">273</context>
+          <context context-type="linenumber">277</context>
         </context-group>
         <note priority="1" from="description">transactions-list.p2tr-tapscript</note>
       </trans-unit>
@@ -5394,7 +5402,7 @@
         <source>P2MR leaf script</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">275</context>
+          <context context-type="linenumber">279</context>
         </context-group>
         <note priority="1" from="description">transactions-list.p2mr-leaf-script</note>
       </trans-unit>
@@ -5402,7 +5410,7 @@
         <source>P2WSH witness script</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">278</context>
+          <context context-type="linenumber">282</context>
         </context-group>
         <note priority="1" from="description">transactions-list.p2wsh-witness-script</note>
       </trans-unit>
@@ -5410,7 +5418,7 @@
         <source>nSequence</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">293</context>
+          <context context-type="linenumber">297</context>
         </context-group>
         <note priority="1" from="description">transactions-list.nsequence</note>
       </trans-unit>
@@ -5418,7 +5426,7 @@
         <source>Previous output script</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">298</context>
+          <context context-type="linenumber">302</context>
         </context-group>
         <note priority="1" from="description">transactions-list.previous-output-script</note>
       </trans-unit>
@@ -5426,7 +5434,7 @@
         <source>Previous output type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">302</context>
+          <context context-type="linenumber">306</context>
         </context-group>
         <note priority="1" from="description">transactions-list.previous-output-type</note>
       </trans-unit>
@@ -5434,7 +5442,7 @@
         <source>Peg-out to <x id="START_TAG_NG_CONTAINER" ctype="x-ng_container" equiv-text="&lt;ng-container *ngTemplateOutlet=&quot;pegOutLink&quot;&gt;"/><x id="CLOSE_TAG_NG_CONTAINER" ctype="x-ng_container" equiv-text="&lt;/ng-contain"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">353,354</context>
+          <context context-type="linenumber">357,358</context>
         </context-group>
         <note priority="1" from="description">transactions-list.peg-out-to</note>
       </trans-unit>
@@ -5442,7 +5450,7 @@
         <source>ScriptPubKey (ASM)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">446</context>
+          <context context-type="linenumber">450</context>
         </context-group>
         <note priority="1" from="description">ScriptPubKey (ASM)</note>
         <note priority="1" from="meaning">transactions-list.scriptpubkey.asm</note>
@@ -5451,7 +5459,7 @@
         <source>ScriptPubKey (HEX)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">459</context>
+          <context context-type="linenumber">463</context>
         </context-group>
         <note priority="1" from="description">ScriptPubKey (HEX)</note>
         <note priority="1" from="meaning">transactions-list.scriptpubkey.hex</note>
@@ -5460,7 +5468,7 @@
         <source>Show more inputs to reveal fee data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">523</context>
+          <context context-type="linenumber">527</context>
         </context-group>
         <note priority="1" from="description">transactions-list.load-to-reveal-fee-info</note>
       </trans-unit>
@@ -5468,7 +5476,7 @@
         <source>leaf version</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">576</context>
+          <context context-type="linenumber">580</context>
         </context-group>
         <note priority="1" from="description">transactions-list.taproot.leaf-version</note>
       </trans-unit>
@@ -5476,7 +5484,7 @@
         <source>parity</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">580</context>
+          <context context-type="linenumber">584</context>
         </context-group>
         <note priority="1" from="description">transactions-list.taproot.parity</note>
       </trans-unit>
@@ -5484,7 +5492,7 @@
         <source>key path</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">585</context>
+          <context context-type="linenumber">589</context>
         </context-group>
         <note priority="1" from="description">transactions-list.taproot.keypath</note>
       </trans-unit>
@@ -5492,7 +5500,7 @@
         <source>script depth</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/components/transactions-list/transactions-list.component.html</context>
-          <context context-type="linenumber">590</context>
+          <context context-type="linenumber">594</context>
         </context-group>
         <note priority="1" from="description">transactions-list.taproot.script-depth</note>
       </trans-unit>

@@ -486,7 +486,10 @@ require('@angular/compiler');
   for (const [name, leafScriptHex, text] of [
     ['a P2MR Inscription with text', pinsLeaf('text'), 'text/plain;charset=utf-8 | 5 | hello'],
     ['a P2MR Inscription with a PNG', pinsLeaf('png'), 'image/png | 97'],
-    ['an opaque P2MR Inscription', pinsLeaf('text').replace('00630470696e73', '00630470696e730104' + '0101'), 'Unknown | 5'],
+    ['an opaque P2MR Inscription', pinsLeaf('text').replace('00630470696e73', '00630470696e730104' + '0101'), 'Opaque | 5'],
+    ['a P2MR Inscription without a content type', pinsLeaf('text').replace('00630470696e73' + '5118' + Buffer.from('text/plain;charset=utf-8').toString('hex'), '00630470696e73'), 'Unknown | 5'],
+    ['an opaque one and one without a content type, apart', pinsLeaf('text').replace('00630470696e73', '00630470696e730104' + '0101') + '00630470696e7300026869' + '68', 'Unknown | 2 | Opaque | 5'],
+    ['a P2MR Inscription with an encoded body', pinsLeaf('text').replace('00630470696e73', '00630470696e73' + '5902' + Buffer.from('br').toString('hex')), 'text/plain;charset=utf-8 | 5 | br'],
   ]) {
     const shown = inscriptionsShown(leafScriptHex);
     assert(shown === text, `${name}: ${JSON.stringify(shown)}`);

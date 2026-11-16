@@ -40,6 +40,7 @@
         <span class="badge badge-ord mr-1" i18n="unknown">Unknown</span>
       }
       <span class="badge badge-ord" *ngIf="contentType.value.totalSize > 0">{{ contentType.value.totalSize | bytes:2:'B':undefined:true }}</span>
+      <span class="badge badge-ord ml-1" *ngIf="contentType.value.encoding">{{ contentType.value.encoding }}</span>
       <a *ngIf="contentType.value.delegate" [routerLink]="['/tx' | relativeUrl, contentType.value.delegate]">
         @if (pins) {
           <span i18n="ord.source-pins">Source inscription</span>
@@ -51,6 +52,12 @@
     <pre *ngIf="contentType.value.json" class="name" style="white-space: pre-wrap; word-break: break-word;">{{ contentType.value.json | json }}</pre>
     <pre *ngIf="contentType.value.text" class="name" style="white-space: pre-wrap; word-break: break-word;">{{ contentType.value.text }}</pre>
     </div>
+  @if (opaqueData) {
+    <div>
+      <span class="badge badge-ord mr-1">{{ opaqueData.count > 1 ? opaqueData.count + " " : "" }}<ng-container i18n="ord.opaque">Opaque</ng-container></span>
+      <span class="badge badge-ord" *ngIf="opaqueData.totalSize > 0">{{ opaqueData.totalSize | bytes:2:'B':undefined:true }}</span>
+    </div>
+  }
 }
 
 @if (!runestone && type === 'vout') {

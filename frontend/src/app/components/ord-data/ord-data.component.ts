@@ -19,7 +19,9 @@ export class OrdDataComponent implements OnChanges {
   toNumber = (value: bigint): number => Number(value);
 
   // Inscriptions
-  inscriptionsData: { [key: string]: { count: number, totalSize: number, text?: string; json?: JSON; tag?: string; delegate?: string } };
+  inscriptionsData: { [key: string]: { count: number, totalSize: number, text?: string; json?: JSON; tag?: string; delegate?: string; encoding?: string } };
+  // P2MR Inscriptions with an unknown even tag (PINS-1 section 5.4): counted apart, their content is not read
+  opaqueData: { count: number, totalSize: number } | null = null;
   // Rune mints
   minted: number;
   // Rune transfers
@@ -50,7 +52,15 @@ export class OrdDataComponent implements OnChanges {
 
       if (this.inscriptions?.length) {
         this.inscriptionsData = {};
+        this.opaqueData = null;
         this.inscriptions.forEach((inscription) => {
+          if (inscription.opaque) {
+            this.opaqueData = this.opaqueData || { count: 0, totalSize: 0 };
+            this.opaqueData.count++;
+            this.opaqueData.totalSize += inscription.body_length;
+            return;
+          }
+
           // General: count, total size, delegate
           const key = inscription.content_type_str || 'undefined';
           if (!this.inscriptionsData[key]) {
@@ -60,6 +70,11 @@ export class OrdDataComponent implements OnChanges {
           this.inscriptionsData[key].totalSize += inscription.body_length;
           if (inscription.delegate_txid && !this.inscriptionsData[key].delegate) {
             this.inscriptionsData[key].delegate = inscription.delegate_txid;
+          }
+          // a P2MR Inscription's encoded body (content_encoding, PINS-1 section 8) is not decoded here, so it is not shown as text
+          if (inscription.content_encoding) {
+            this.inscriptionsData[key].encoding = this.inscriptionsData[key].encoding || inscription.content_encoding;
+            return;
           }
 
           // Text / JSON data
