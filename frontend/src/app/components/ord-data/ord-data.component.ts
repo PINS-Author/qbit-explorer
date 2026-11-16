@@ -51,7 +51,8 @@ export class OrdDataComponent implements OnChanges {
     if (changes.inscriptions && this.inscriptions) {
 
       if (this.inscriptions?.length) {
-        this.inscriptionsData = {};
+        // keyed by content type, which is any string a transaction writes, "__proto__" included
+        this.inscriptionsData = Object.create(null);
         this.opaqueData = null;
         this.inscriptions.forEach((inscription) => {
           if (inscription.opaque) {

@@ -495,6 +495,26 @@ require('@angular/compiler');
     assert(shown === text, `${name}: ${JSON.stringify(shown)}`);
   }
 
+  // a content type "__proto__" is a group like any other and writes nothing to Object.prototype
+  {
+    const protoHex = Buffer.from('__proto__').toString('hex');
+    const delegateHex = '20' + 'ab'.repeat(32);
+    const shownProto = inscriptionsShown('20' + '02'.repeat(32) + 'b3' + '00630470696e735109' + protoHex + '5b' + delegateHex + '00017868');
+    assert(shownProto === '__proto__ | 1', `__proto__ content type: ${JSON.stringify(shownProto)}`);
+    const ordProto = new OrdApiService({}).decodeInscriptions('20' + '02'.repeat(32) + 'b3' + '0063036f7264' + '010109' + protoHex + '01' + '0b' + delegateHex + '00017868');
+    assert(ordProto.length === 1 && ordProto[0].content_type_str === '__proto__', `ord __proto__ envelope: ${JSON.stringify(ordProto)}`);
+    const element = render(OrdDataComponent, 'src/app/components/ord-data/ord-data.component.html', [],
+      [RouterLink, passthrough('relativeUrl'), passthrough('amountShortener'), passthrough('bytes')], (ord) => {
+        Object.assign(ord, { inscriptions: ordProto, type: 'vin' });
+        ord.ngOnChanges({ inscriptions: {} });
+      });
+    assert(element.querySelector('.badge')?.textContent.trim() === '__proto__', 'ord __proto__ group');
+    for (const name of ['count', 'totalSize', 'delegate']) {
+      assert(!Object.prototype.hasOwnProperty.call(Object.prototype, name), `Object.prototype.${name} was written`);
+    }
+    assert(inscriptionsShown(pinsLeaf('png')) === 'image/png | 97', 'a later panel inherits a delegate');
+  }
+
   // a delegate link reads "Source qscription" as before, and "Source inscription" next to a P2MR Inscription
   const delegateLink = (pins) => {
     const element = render(OrdDataComponent, 'src/app/components/ord-data/ord-data.component.html', [],
