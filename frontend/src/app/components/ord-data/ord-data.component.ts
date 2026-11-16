@@ -14,6 +14,7 @@ export class OrdDataComponent implements OnChanges {
   @Input() runestone: Runestone;
   @Input() runeInfo: { [id: string]: { etching: Etching; txid: string } };
   @Input() type: 'vin' | 'vout';
+  @Input() pins = false;
 
   toNumber = (value: bigint): number => Number(value);
 
