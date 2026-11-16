@@ -354,6 +354,17 @@ assert(decoded.vout[0].scriptpubkey_asm === 'OP_CHECKSIGPQC', `0xb3 ASM mismatch
     assert(big.length / 2 > 400_000 && read.body_length === 8 * pushes && read.is_cropped, `large body: ${read.body_length}`);
     assert(hasPinsEnvelope(big) && elapsed < 2000, `large body read in ${elapsed} ms`);
   }
+  // metadata (field 5) in many 1-byte chunks (OP_5 <01>) is joined once, in linear time
+  {
+    const chunks = 134_000;
+    const big = leaf('00630470696e73510a' + ascii('text/plain') + '550101'.repeat(chunks) + '0005' + ascii('hello') + '68');
+    const started = Date.now();
+    const [envelope] = parsePinsEnvelopes(hexToBytes(big));
+    const elapsed = Date.now() - started;
+    const metadata = envelope.fields.find(({ tag }) => tag === 5).value;
+    assert(big.length / 2 > 400_000 && metadata.length === chunks && metadata.every((byte) => byte === 1) && Buffer.from(envelope.body).toString() === 'hello', `large metadata: ${metadata.length}`);
+    assert(decodeOne(big).content_type_str === 'text/plain' && elapsed < 2000, `large metadata read in ${elapsed} ms`);
+  }
   // content_encoding (field 9) is kept, so the panel does not show an encoded body as text (PINS-1 section 8)
   const encoded = decodeOne(leaf('00630470696e73510a' + ascii('text/plain') + '5902' + ascii('br') + '0003' + '0b0280' + '68'));
   assert(encoded.content_encoding === 'br' && encoded.content_type_str === 'text/plain', `content_encoding: ${JSON.stringify(encoded)}`);

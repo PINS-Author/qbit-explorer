@@ -125,6 +125,8 @@ function readPinsEnvelope(pushes: Uint8Array[]): PinsEnvelope {
   }
   const fields: { tag: number; value: Uint8Array }[] = [];
   const seen = new Set<number>();
+  // metadata chunks are joined once after the loop, so many small chunks are still read in linear time
+  const metadata: Uint8Array[] = [];
   for (let i = 0; i + 1 < separator; i += 2) {
     const tagBytes = pushes[i];
     const value = pushes[i + 1];
@@ -143,13 +145,16 @@ function readPinsEnvelope(pushes: Uint8Array[]): PinsEnvelope {
     if (seen.has(tag) && tag !== PINS_METADATA) {
       flags.add('duplicate_field');
     }
-    seen.add(tag);
-    const existing = fields.find((field) => field.tag === tag);
-    if (!existing) {
+    if (!seen.has(tag)) {
       fields.push({ tag, value });
-    } else if (tag === PINS_METADATA) {
-      existing.value = concatUint8Arrays([existing.value, value]);
     }
+    seen.add(tag);
+    if (tag === PINS_METADATA) {
+      metadata.push(value);
+    }
+  }
+  if (metadata.length > 1) {
+    fields.find((field) => field.tag === PINS_METADATA).value = concatUint8Arrays(metadata);
   }
   return { fields, body: concatUint8Arrays(pushes.slice(separator + 1)), flags: Array.from(flags) };
 }
