@@ -146,36 +146,6 @@ export function getNextInscriptionMark(raw: Uint8Array, startPosition: number): 
   return -1;
 }
 
-// The envelope start of a P2MR Inscription (PINS-1 section 4.1): OP_FALSE OP_IF, then a push of exactly the 4 bytes "pins".
-// It is matched as the byte sequence of its minimal encoding (OP_PUSHBYTES_4), which writers must use (PINS-1 section 9.2).
-// An envelope whose marker uses a non-minimal push (PINS-1 section 4.3) is not recognized here.
-export const OP_PUSHBYTES_4 = 0x04;
-export const PINS_INSCRIPTION_MARK_HEX = '00630470696e73';
-
-/**
- * Searches for the next position of the P2MR Inscription mark (00630470696e73).
- *
- * @returns The position immediately after the mark, or -1 if not found.
- */
-export function getNextPinsInscriptionMark(raw: Uint8Array, startPosition: number): number {
-  const pinsMark = new Uint8Array([OP_FALSE, OP_IF, OP_PUSHBYTES_4, 0x70, 0x69, 0x6e, 0x73]);
-
-  for (let index = startPosition; index <= raw.length - pinsMark.length; index++) {
-    let matches = true;
-    for (let offset = 0; offset < pinsMark.length; offset++) {
-      if (raw[index + offset] !== pinsMark[offset]) {
-        matches = false;
-        break;
-      }
-    }
-    if (matches) {
-      return index + pinsMark.length;
-    }
-  }
-
-  return -1;
-}
-
 /////////////////////////////// Reader ///////////////////////////////
 
 /**
@@ -351,6 +321,8 @@ export function concatUint8Arrays(arrays: Uint8Array[]): Uint8Array {
 export interface Inscription {
   /** A P2MR Inscription with an unknown even tag: it is recognized, but its content is not to be read or shown (PINS-1 section 5.4). */
   opaque?: boolean;
+  /** The `content_encoding` of a P2MR Inscription (PINS-1 section 8): its body is encoded and is not shown as text. */
+  content_encoding?: string;
   body?: Uint8Array;
   is_cropped?: boolean;
   body_length?: number;
@@ -453,22 +425,5 @@ export function extractInscriptionData(raw: Uint8Array, pointer: number): Inscri
 
   } catch (ex) {
     return null;
-  }
-}
-
-/**
- * Whether the fields of the P2MR Inscription that starts at `pointer` hold an even tag that PINS-1 does not define
- * (it defines 0, the body separator, and 2, `pointer`). The writer signals a rule a reader does not know, so
- * the reader must not interpret or show the content (PINS-1 section 5.4).
- *
- * @param raw - The raw data to read.
- * @param pointer - The position immediately after the `pins` mark.
- */
-export function hasUnknownEvenTag(raw: Uint8Array, pointer: number): boolean {
-  try {
-    const [fields] = extractFields(raw, pointer);
-    return fields.some(({ tag }) => tag % 2 === 0 && tag !== 0 && tag !== 2);
-  } catch {
-    return false;
   }
 }

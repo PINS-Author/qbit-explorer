@@ -294,6 +294,85 @@ assert(decoded.vout[0].scriptpubkey_asm === 'OP_CHECKSIGPQC', `0xb3 ASM mismatch
   const opaque = ordApi.decodePinsInscriptions(opaqueScript);
   assert(opaque.length === 1 && opaque[0].opaque === true && opaque[0].body.length === 0 && opaque[0].content_type_str === 'undefined' && opaque[0].body_length === 5, `opaque P2MR Inscription: ${JSON.stringify(opaque)}`);
 
+  // The PINS-1 envelope vectors (P2MR-Inscriptions/pins v1.0.1, docs/specs/vectors/envelope.json, CC0-1.0, copied
+  // verbatim): every leaf script gives exactly the envelopes the spec lists, and the button shows exactly when there
+  // is at least one
+  const { parsePinsEnvelopes, hasPinsEnvelope, pinsLeafScript, pinsDelegateTxid } = require('../src/app/shared/ord/pins.utils.ts');
+  const { hexToBytes } = require('../src/app/shared/ord/inscription.utils.ts');
+  const envelopeVectors = require('../../backend/src/__tests__/api/test-data/qbit-pins-envelope-vectors.json');
+  assert(envelopeVectors.cases.length === 20, `PINS-1 envelope vectors: ${envelopeVectors.cases.length}`);
+  for (const { name, script_hex: scriptHex, envelopes } of envelopeVectors.cases) {
+    const read = parsePinsEnvelopes(hexToBytes(scriptHex)).map((envelope) => ({
+      fields: envelope.fields.map(({ tag, value }) => ({ tag, value_hex: Buffer.from(value).toString('hex') })),
+      body_hex: Buffer.from(envelope.body).toString('hex'),
+      flags: envelope.flags,
+    }));
+    assert(JSON.stringify(read) === JSON.stringify(envelopes), `PINS-1 vector "${name}": ${JSON.stringify(read)}`);
+    assert(hasPinsEnvelope(scriptHex) === envelopes.length > 0, `PINS-1 vector "${name}": button`);
+    assert(ordApi.decodePinsInscriptions(scriptHex).length === envelopes.length, `PINS-1 vector "${name}": panel`);
+  }
+
+  // Crafted leaf scripts. Each starts with <32 bytes of 0x02> OP_CHECKSIGPQC, as the vectors do.
+  const leaf = (rest) => '20' + '02'.repeat(32) + 'b3' + rest;
+  const ascii = (text) => Buffer.from(text).toString('hex');
+  const decodeOne = (scriptHex) => {
+    const read = ordApi.decodePinsInscriptions(scriptHex);
+    assert(read.length === 1, `expected one P2MR Inscription in ${scriptHex.slice(0, 80)}…, got ${read.length}`);
+    return read[0];
+  };
+  // marker bytes inside a push are data: an image/png envelope whose body is one push of envelope bytes is one
+  // P2MR Inscription, and the same push dropped by OP_DROP, with no envelope around it, is none
+  const inner = '00630470696e73510a' + ascii('text/plain') + '0004' + ascii('FAKE') + '68';
+  const outer = decodeOne(leaf('00630470696e735109' + ascii('image/png') + '001a' + inner + '68'));
+  assert(outer.content_type_str === 'image/png' && Buffer.from(outer.body).toString('hex') === inner, `envelope bytes in a body push: ${JSON.stringify(outer)}`);
+  assert(!ordApi.decodePinsInscriptions(leaf('1a' + inner + '75')).length && !hasPinsEnvelope(leaf('1a' + inner + '75')), 'envelope bytes in a dropped push were read');
+  // the marker shifted by one nibble inside a push gives no button
+  assert(!hasPinsEnvelope(leaf('08f00630470696e73075')), 'marker at a nibble offset gives a button');
+  // a body separator written as OP_PUSHDATA1 with length 0 reads like OP_0 (PINS-1 section 4.3)
+  const pushdataSeparator = decodeOne(leaf('00630470696e73510a' + ascii('text/plain') + '4c0005' + ascii('hello') + '68'));
+  assert(pushdataSeparator.content_type_str === 'text/plain' && Buffer.from(pushdataSeparator.body).toString() === 'hello', `OP_PUSHDATA1 separator: ${JSON.stringify(pushdataSeparator)}`);
+  // a tag of more than one byte is an unknown tag with the parity of its first byte (PINS-1 section 5.1): 0200 and
+  // 0200000001 are even, so the P2MR Inscription is opaque; 0100 is odd and ignored, so it has no content type
+  for (const tag of ['0200', '0200000001']) {
+    const multiByte = decodeOne(leaf('00630470696e73510a' + ascii('text/plain') + (tag.length / 2).toString(16).padStart(2, '0') + tag + '010100' + '06' + ascii('secret') + '68'));
+    assert(multiByte.opaque === true && multiByte.body.length === 0 && multiByte.body_length === 6, `even tag ${tag}: ${JSON.stringify(multiByte)}`);
+  }
+  const oddTag = decodeOne(leaf('00630470696e730201000' + '9' + ascii('text/html') + '0005' + ascii('hello') + '68'));
+  assert(!oddTag.opaque && oddTag.content_type_str === 'undefined' && Buffer.from(oddTag.body).toString() === 'hello', `odd tag 0100: ${JSON.stringify(oddTag)}`);
+  // a negative-looking OP_PUSHDATA4 length (fbffffff) is a push past the end of the script: the script cannot be
+  // decoded and holds no envelope, alone or inside an ordinary data push
+  for (const scriptHex of [leaf('00630470696e734efbffffff'), leaf('0c00630470696e734efbffffff75'), leaf('00630470696e734effffffff00')]) {
+    assert(!ordApi.decodePinsInscriptions(scriptHex).length && !hasPinsEnvelope(scriptHex), `truncated OP_PUSHDATA4: ${scriptHex}`);
+  }
+  // a P2MR Inscription whose body is many pushes of envelope bytes is read once, in linear time
+  {
+    const pushes = 50_000;
+    const big = leaf('00630470696e735109' + ascii('image/png') + '00' + '0800630470696e7300'.repeat(pushes) + '68');
+    const started = Date.now();
+    const read = decodeOne(big);
+    const elapsed = Date.now() - started;
+    assert(big.length / 2 > 400_000 && read.body_length === 8 * pushes && read.is_cropped, `large body: ${read.body_length}`);
+    assert(hasPinsEnvelope(big) && elapsed < 2000, `large body read in ${elapsed} ms`);
+  }
+  // content_encoding (field 9) is kept, so the panel does not show an encoded body as text (PINS-1 section 8)
+  const encoded = decodeOne(leaf('00630470696e73510a' + ascii('text/plain') + '5902' + ascii('br') + '0003' + '0b0280' + '68'));
+  assert(encoded.content_encoding === 'br' && encoded.content_type_str === 'text/plain', `content_encoding: ${JSON.stringify(encoded)}`);
+  // delegate (field 11): the txid of a binary P2MR Inscription ID, with or without an index (PINS-1 section 6.1)
+  const txid = 'ab'.repeat(31) + '01';
+  const internal = Buffer.from(txid, 'hex').reverse().toString('hex');
+  assert(pinsDelegateTxid(hexToBytes(internal)) === txid && pinsDelegateTxid(hexToBytes(internal + '01')) === txid && pinsDelegateTxid(hexToBytes(internal + 'ffffffff')) === txid, 'delegate txid');
+  for (const value of [internal.slice(2), internal + '00', internal + '0100', internal + '0102030405']) {
+    assert(pinsDelegateTxid(hexToBytes(value)) === null, `delegate ${value.length / 2} bytes is not a binary ID`);
+  }
+  const delegating = decodeOne(leaf('00630470696e735b21' + internal + '0268'));
+  assert(delegating.delegate_txid === txid, `delegate with index 2: ${delegating.delegate_txid}`);
+  // envelopes are looked for in the leaf script of leaf version 0xc0 only, after an annex is removed (PINS-1 section 4.2)
+  const pinsWitness = pinsReveals.text.tx.vin[0].witness;
+  const [, revealLeafScript, revealControl] = pinsWitness;
+  assert(pinsLeafScript(pinsWitness) === revealLeafScript && pinsLeafScript([...pinsWitness, '50']) === revealLeafScript, 'leaf script of a 0xc0 spend');
+  assert(pinsLeafScript(['00', revealLeafScript, 'c1' + revealControl.slice(2)]) === revealLeafScript, 'leaf version 0xc0 with the parity bit');
+  assert(pinsLeafScript(['00', revealLeafScript, 'c2' + revealControl.slice(2)]) === null && pinsLeafScript([revealLeafScript, '50']) === null && pinsLeafScript([revealControl]) === null, 'leaf script outside leaf version 0xc0');
+
   const etched = decipherRunestone(etching)?.etching;
   assert(etched?.spacedName === 'POST•QUANTUM•GOODS' && etched.symbol === '⚛' && etched.supply === 21000000n, `etching: ${etched?.spacedName}`);
   assert(decipherRunestone(mint)?.mint?.toString() === '163891:2', 'mint does not name qrune 163891:2');

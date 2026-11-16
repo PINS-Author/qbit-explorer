@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of, switchMap, tap } from 'rxjs';
 import { Inscription } from '@app/shared/ord/inscription.utils';
 import { Transaction } from '@interfaces/electrs.interface';
-import { getNextInscriptionMark, getNextPinsInscriptionMark, hasUnknownEvenTag, hexToBytes, extractInscriptionData } from '@app/shared/ord/inscription.utils';
+import { getNextInscriptionMark, hexToBytes, extractInscriptionData } from '@app/shared/ord/inscription.utils';
+import { parsePinsEnvelopes, pinsEnvelopeToInscription } from '@app/shared/ord/pins.utils';
 import { decipherRunestone, Runestone, Etching } from '@app/shared/ord/rune.utils';
 import { ElectrsApiService } from '@app/services/electrs-api.service';
 
@@ -96,29 +97,11 @@ export class OrdApiService {
   }
 
   /**
-   * Reads the P2MR Inscriptions (PINS-1) of a leaf script, in order. Same envelope fields as decodeInscriptions reads;
-   * only the marker `pins` is looked for. A P2MR Inscription with an unknown even tag is returned as opaque: its size
-   * only, nothing of its content (PINS-1 section 5.4).
+   * Reads the P2MR Inscriptions (PINS-1) of a leaf script, in order, by walking its instructions (PINS-1 section 4.3).
+   * A P2MR Inscription with an unknown even tag is returned as opaque: its size only, nothing of its content
+   * (PINS-1 section 5.4).
    */
   decodePinsInscriptions(script: string): Inscription[] {
-    const inscriptions: Inscription[] = [];
-    const raw = hexToBytes(script);
-    let startPosition = 0;
-
-    while (true) {
-      const pointer = getNextPinsInscriptionMark(raw, startPosition);
-      if (pointer === -1) {break;}
-
-      const inscription = extractInscriptionData(raw, pointer);
-      if (inscription) {
-        inscriptions.push(hasUnknownEvenTag(raw, pointer)
-          ? { opaque: true, content_type_str: 'undefined', body: new Uint8Array(), is_cropped: false, body_length: inscription.body_length, delegate_txid: null }
-          : inscription);
-      }
-
-      startPosition = pointer;
-    }
-
-    return inscriptions;
+    return parsePinsEnvelopes(hexToBytes(script)).map(pinsEnvelopeToInscription);
   }
 }
