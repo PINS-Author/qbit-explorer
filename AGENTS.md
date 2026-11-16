@@ -155,7 +155,7 @@ parameters in that order.
 | Bech32 HRPs | Mainnet `qb`, testnet4 `tq`, regtest `qbrt` | `src/kernel/chainparams.cpp:219`, `:413`, `:657` |
 | Base58 P2PKH | Mainnet 58 (`Q`), testnet4/regtest 120 (`q`) | `src/kernel/chainparams.cpp:213`, `:407`, `:651` |
 | Base58 P2SH | Mainnet 63 (`S`), testnet4/regtest 125 (`s`) | `src/kernel/chainparams.cpp:214`, `:408`, `:652` |
-| New script types | `witness_v2_p2mr`, `anchor` | `src/script/solver.cpp:28`, `:32`; qbit-electrs `doc/qbit-contract.md` P2MR section |
+| New script types | `witness_v2_p2mr`, `anchor` | `src/script/solver.cpp:32`, `:28`; qbit-electrs `doc/qbit-contract.md` P2MR section |
 | qbit opcode | `OP_CHECKSIGPQC = 0xb3` | `src/script/script.h:318` |
 | PQC signature size | 3,680 bytes | `src/libbitcoinpqc/include/libbitcoinpqc/slh_dsa.h:19-21` |
 | PQC public key size | 32 bytes | `src/libbitcoinpqc/include/libbitcoinpqc/slh_dsa.h:19-21` |
