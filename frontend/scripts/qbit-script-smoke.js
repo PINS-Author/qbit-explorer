@@ -260,6 +260,22 @@ assert(decoded.vout[0].scriptpubkey_asm === 'OP_CHECKSIGPQC', `0xb3 ASM mismatch
   assert(qscriptions[0].content_type_str === 'image/svg+xml', `qscription content type: ${qscriptions[0].content_type_str}`);
   assert(qscriptions[0].body_length === 525, `qscription body length: ${qscriptions[0].body_length}`);
 
+  // push lengths are read unsigned, and a push past the end of the leaf script is a failed parse: an OP_PUSHDATA4
+  // length of fbffffff (4294967291 bytes, -5 when read signed) returns at once, in a field or in the body, and a
+  // truncated direct push gives no qscription
+  const ordLeaf = (rest) => '20' + '02'.repeat(32) + 'b3' + '0063036f7264' + rest;
+  const textField = '01010a' + Buffer.from('text/plain').toString('hex');
+  for (const scriptHex of [ordLeaf('4efbffffff'), ordLeaf(textField + '00' + '4efbffffff' + '68'), ordLeaf(textField + '00' + '056869' + '68')]) {
+    const started = Date.now();
+    const read = ordApi.decodeInscriptions(scriptHex);
+    assert(read.length === 0 && Date.now() - started < 1000, `push past the end of ${scriptHex.slice(68)}: ${JSON.stringify(read)}`);
+  }
+  // OP_PUSHDATA1, 2 and 4 bodies within the script are read as before
+  for (const push of ['4c03', '4d0300', '4e03000000']) {
+    const [read] = ordApi.decodeInscriptions(ordLeaf(textField + '00' + push + '616263' + '68'));
+    assert(read?.content_type_str === 'text/plain' && Buffer.from(read.body).toString() === 'abc', `${push} body: ${JSON.stringify(read)}`);
+  }
+
   const etched = decipherRunestone(etching)?.etching;
   assert(etched?.spacedName === 'POST•QUANTUM•GOODS' && etched.symbol === '⚛' && etched.supply === 21000000n, `etching: ${etched?.spacedName}`);
   assert(decipherRunestone(mint)?.mint?.toString() === '163891:2', 'mint does not name qrune 163891:2');
@@ -368,6 +384,7 @@ require('@angular/compiler');
     const shown = ordData(runestone, runeInfo);
     assert(shown.text === text && JSON.stringify(shown.links) === JSON.stringify(links), `${name}: ${JSON.stringify(shown)}`);
   }
+
 }
 
 // HTTP/2 has no status text, so Angular's XHR backend fills in 'OK' and an error printed "400 OK"
